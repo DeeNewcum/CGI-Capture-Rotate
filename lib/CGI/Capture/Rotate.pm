@@ -4,9 +4,12 @@ our $VERSION = 0.01;
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
-CGI::Capture::Rotate - Provide "log rotation"-like functionality for CGI::Capture files
+CGI::Capture::Rotate — Provides "log rotation"-like functionality for
+CGI::Capture files
 
 =head1 SYNOPSIS
 
@@ -15,20 +18,30 @@ CGI::Capture::Rotate - Provide "log rotation"-like functionality for CGI::Captur
  use CGI::Capture::Rotate DIR => '/var/tmp/capture_files/', EXPIRE => '12h',
                           TEMPLATE => 'appnameXXXXXX', SUFFIX => '.storable';
 
-C<TEMPLATE> and C<SUFFIX> are actually passed directly on to L<File::Temp>.
+C<TEMPLATE> is a filename that ends with several C<X>s, which will be replaced
+by random characters. C<SUFFIX> will be appended to the filename. (both are
+passed directly to L<File::Temp>)
+
 C<EXPIRE> can be '3m', '3h', '3d', '3mo', or '3y'.
 
 =head1 DESCRIPTION
 
 Provides two features: This module automatically chooses a unique filename for
 the L<CGI::Capture> file (instead of always recording to the same file), and it
-also removes CGI::Capture files that have expired (by default, ones older than
-three days).
+also removes CGI::Capture files that have expired — by default, ones older than
+three days.
 
 Additionally, a command-line tool (C<ls_captures>) is provided which helps to
 locate the specific capture file that you might be interested in applying.
-Alternately, you can employ 'use L<if>' to only enable captures based on a
-specific User-Agent string, for example.
+
+Another way to locate the desired capture file is to simply record fewer capture
+files, by only triggering a capture in certain specific instances, using L<if>:
+
+ use if $ENV{HTTP_USER_AGENT} =~ /special trigger/, 'CGI::Capture::Rotate'
+            => '/var/tmp/capture_files/';
+
+A L<user-agent switcher|https://chrome.google.com/webstore/detail/user-agent-switcher-for-c/djflhoibgkdhkhhcedjiklpkjnoahfmg?hl=en-US> 
+is very handy in this case.
 
 =head1 AUTHOR
 

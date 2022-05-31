@@ -2,9 +2,11 @@
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
-ls_captures - List all CGI::Capture files located in a directory
+ls_captures — List all CGI::Capture files located in a directory
 
 =head1 SYNOPSIS
 
