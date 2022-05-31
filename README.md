@@ -19,10 +19,10 @@ the [CGI::Capture](https://metacpan.org/pod/CGI::Capture) file (instead of alway
 also removes CGI::Capture files that have expired (by default, ones older than
 three days).
 
-Additionally, a command-line tool is provided which helps to locate the specific
-capture file that you might be interested in applying. Alternately, you can
-employ 'use [if](https://metacpan.org/pod/if)' to only enable captures based on a specific User-Agent
-string, for example.
+Additionally, a command-line tool (`ls_captures`) is provided which helps to
+locate the specific capture file that you might be interested in applying.
+Alternately, you can employ 'use [if](https://metacpan.org/pod/if)' to only enable captures based on a
+specific User-Agent string, for example.
 
 # AUTHOR
 

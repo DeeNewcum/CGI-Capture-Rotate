@@ -1,0 +1,104 @@
+#!/usr/bin/perl
+
+=pod
+
+=head1 NAME
+
+ls_captures - List all CGI::Capture files located in a directory
+
+=head1 SYNOPSIS
+
+ $ ls_captures [directory]
+
+If no directory is provided, it lists all capture files in the current directory.
+
+ <TODO>
+
+=head1 DESCRIPTION
+
+Provides a summary of all CGI::Capture files in the specified directory, sorted
+by most-recent last.
+
+=head1 AUTHOR
+
+Dee Newcum <deenewcum@cpan.org>
+
+=head1 LICENSE
+
+This library is free software; you may redistribute it and/or modify it under
+the same terms as Perl itself.
+
+=cut
+
+use strict;
+use warnings;
+
+use Data::Dumper;               # core Perl since v5.005
+use File::stat          ();     # core Perl since v5.004
+use Path::Tiny          ();
+use Storable            ();     # core Perl since v5.7.3
+use Try::Tiny;
+
+my $directory;
+if (@ARGV) {
+    $directory = shift;
+    chdir($directory)
+        or die "Couldn't chdir to '$directory': $!\n";
+}
+
+my $iter = Path::Tiny::path(".")->iterator( {
+        recurse         => 0,
+        follow_symlinks => 0,
+    } );
+my %file_ages;          # map $filename => $mtime_age
+while (my $path = $iter->()) {
+    my $file = $path->stringify;
+    next unless (-f $file);
+    $file_ages{$file} = -M $file;       # script start time minus file modification time, in days
+}
+my @file_sorted = sort {$file_ages{$b} <=> $file_ages{$a}} keys %file_ages;
+
+# TODO: Maybe use Curses.pm to provide a simple menu that allows the user to
+# scroll up/down, while displaying a summary of each capture file in a panel at
+# the bottom?
+foreach my $filename (@file_sorted) {
+    my $storable;
+    try {
+        $storable = Storable::retrieve($filename);
+    } catch {
+        if (/^Magic number checking on storable file failed/) {
+            # this wasn't a Storable file, so just skip it
+            $storable = undef;
+        } else {
+            die "$_\n";
+        }
+    };
+    defined($storable) or next;
+    # if it's a Storable file, but it doesn't contain CGI::Capture contents,
+    # then also skip it
+    ref($storable) eq 'CGI::Capture'    or next;
+    report_one_capture_file($filename, $storable);
+}
+
+
+sub report_one_capture_file {
+    my ($filename, $storable) = @_;
+    my $time = scalar(localtime($storable->{CAPTURE_TIME}));
+    print "$time    ", url($storable), "\n";
+    # this is actually the specific command-line that the dev should use to
+    # apply() that CGI::Capture file
+    print "    perl -d -MCGI::Capture=$filename $storable->{PROGRAM_NAME}\n";
+    print "    $storable->{ENV}{HTTP_USER_AGENT}\n";
+}
+
+
+# given a CGI::Capture object, return the full URL that initiated that CGI
+# session
+sub url {
+    my ($storable) = @_;
+    my $url = $storable->{ENV}{SCRIPT_URI};
+    if ($storable->{ENV}{QUERY_STRING}) {
+        $url .= "?$storable->{ENV}{QUERY_STRING}";
+    }
+    return $url;
+}

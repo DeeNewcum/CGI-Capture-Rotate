@@ -25,10 +25,10 @@ the L<CGI::Capture> file (instead of always recording to the same file), and it
 also removes CGI::Capture files that have expired (by default, ones older than
 three days).
 
-Additionally, a command-line tool is provided which helps to locate the specific
-capture file that you might be interested in applying. Alternately, you can
-employ 'use L<if>' to only enable captures based on a specific User-Agent
-string, for example.
+Additionally, a command-line tool (C<ls_captures>) is provided which helps to
+locate the specific capture file that you might be interested in applying.
+Alternately, you can employ 'use L<if>' to only enable captures based on a
+specific User-Agent string, for example.
 
 =head1 AUTHOR
 
