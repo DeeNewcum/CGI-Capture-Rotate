@@ -35,6 +35,7 @@ the same terms as Perl itself.
 use strict;
 use warnings;
 
+use CGI::Simple         ();
 use Data::Dumper;               # core Perl since v5.005
 use File::stat          ();     # core Perl since v5.004
 use Path::Tiny          ();
@@ -85,7 +86,11 @@ foreach my $filename (@file_sorted) {
 
 sub report_one_capture_file {
     my ($filename, $storable) = @_;
+
     my $time = scalar(localtime($storable->{CAPTURE_TIME}));
+
+    # this is the specific command-line that the dev should use to apply()
+    # this CGI::Capture file
     my $debug_cmd = "perl -d -MCGI::Capture=$filename $storable->{PROGRAM_NAME}";
     if ($storable->{EFFECTIVE_USER_ID} != $>) {
         my $desired_username = getpwuid($storable->{EFFECTIVE_USER_ID});
@@ -96,9 +101,30 @@ sub report_one_capture_file {
         }
     }
 
+    # if the requester sent method=POST application/x-www-form-urlencoded
+    # parameters, then display them in a user-friendly way
+    my $body_params = '';
+    if (${$storable->{STDIN}}) {
+        my $cgi = CGI::Simple->new(${$storable->{STDIN}});
+        foreach my $param ($cgi->param) {
+            my $will_add = '';
+            $will_add .= ", "        if ($body_params);
+            $will_add .= quotemeta($param);
+            $will_add .= "='" . quotemeta($cgi->param($param)) . "'";
+            # If a request has quite a few body_params, we should only
+            # display the first N characters of them. Right now, we
+            # hard-code the screen width, but
+            # TODO: we should probably fetch the actual current screen width
+            # https://stackoverflow.com/a/1782149/1042525
+            if (length($body_params . $will_add) > 120) {
+                last;   # this latest parameter would push us over the limit
+            }
+            $body_params .= $will_add;
+        }
+    }
+
     print "$time    ", url($storable), "\n";
-    # this is actually the specific command-line that the dev should use to
-    # apply() that CGI::Capture file
+    print "    $body_params\n"      if ($body_params);
     print "    $debug_cmd\n";
     print "    $storable->{ENV}{HTTP_USER_AGENT}\n";
 }
