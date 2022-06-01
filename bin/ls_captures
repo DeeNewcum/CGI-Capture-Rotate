@@ -99,6 +99,8 @@ foreach my $filename (@file_sorted) {
 }
 
 
+our %PERL5LIB_cache;        # maps $perl_path => $PERL5LIB
+
 sub report_one_capture_file {
     my ($filename, $storable) = @_;
 
@@ -111,8 +113,14 @@ sub report_one_capture_file {
 
     # this is the specific command-line that the dev should use to apply()
     # this CGI::Capture file
-    my $debug_cmd = "perl -d -MCGI::Capture=" .
-            Cwd::abs_path($filename) . " $storable->{PROGRAM_NAME}";
+    my $PERL_PATH = $storable->{PERL_PATH};
+    if (!exists $PERL5LIB_cache{$PERL_PATH}) {
+        $PERL5LIB_cache{$PERL_PATH} = get_CGICapture_PERL5LIB($storable);
+    }
+    my $debug_cmd = "$storable->{PERL_PATH} -d "
+            . $PERL5LIB_cache{$PERL_PATH}
+            . "-MCGI::Capture=" . Cwd::abs_path($filename)
+            . " $storable->{PROGRAM_NAME}";
     if ($storable->{EFFECTIVE_USER_ID} != $>) {
         my $desired_username = getpwuid($storable->{EFFECTIVE_USER_ID});
         if ($desired_username) {
@@ -173,4 +181,46 @@ sub report_one_capture_file {
     print "    $debug_cmd\n";
     print "    ", $colored->($storable->{ENV}{REMOTE_ADDR}, 'green'),
           "    ", $colored->($storable->{ENV}{HTTP_USER_AGENT}, 'blue'), "\n";
+}
+
+
+# Unfortunately, there are situations where you need to set a specific $PERL5LIB
+# before you can access CGI::Capture.
+sub get_CGICapture_PERL5LIB {
+    my ($storable) = @_;
+    # check if CGI::Capture is available under a blank $PERL5LIB
+    defined(my $pid = fork())
+        or die "Couldn't fork: $!\n";
+    if (!$pid) {
+        # we're the child now
+        open(STDERR, '>', '/dev/null');     # hide STDERR output
+        delete $ENV{PERL5LIB};
+        exec($storable->{PERL_PATH}, '-MCGI::Capture', '-e1');
+        exit(3);
+    }
+    # We're the parent now. Wait for the child to exit.
+    waitpid($pid, 0);
+    if ($? >> 8 == 0) {
+        # great, CGI::Capture is available under the default perl
+        return '';
+    }
+
+    # okay, figure out where under @INC CGI/Capture.pm is located
+    $pid = open(my $pipe, '-|');
+    defined($pid) or die "Couldn't fork: $!\n";
+    if (!$pid) {
+        # we're the child now
+        delete $ENV{PERL5LIB};
+        my @cmd = ($storable->{PERL_PATH});
+        foreach my $inc (@{$storable->{INC}}) {
+            push(@cmd, "-I$inc");
+        }
+        push(@cmd, "-MCGI::Capture", '-eprint $INC{"CGI/Capture.pm"}');
+        exec(@cmd);
+        exit(1);
+    }
+    # We're the parent now. Read what the child printed on its STDOUT.
+    my $inc = join("", <$pipe>);
+    $inc =~ s#/+CGI/Capture\.pm$##;
+    return "-I$inc ";
 }
