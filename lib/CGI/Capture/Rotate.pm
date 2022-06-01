@@ -15,6 +15,8 @@ CGI::Capture files
 
  use CGI::Capture::Rotate '/var/tmp/capture_files/';
 
+or, all the options:
+
  use CGI::Capture::Rotate DIR => '/var/tmp/capture_files/', EXPIRE => '12h',
                           TEMPLATE => 'appnameXXXXXX', SUFFIX => '.storable';
 
@@ -27,9 +29,8 @@ C<EXPIRE> can be '3m', '3h', '3d', '3mo', or '3y'.
 =head1 DESCRIPTION
 
 Provides two features: This module automatically chooses a unique filename for
-the L<CGI::Capture> file (instead of always recording to the same file), and it
-also removes CGI::Capture files that have expired — by default, ones older than
-three days.
+the L<CGI::Capture> file, and it also removes CGI::Capture files that have
+expired — by default, ones older than three days.
 
 Additionally, a command-line tool (C<ls_captures>) is provided which helps to
 locate the specific capture file that you might be interested in applying.
@@ -41,7 +42,8 @@ files, by only triggering a capture in certain specific instances, using L<if>:
             => '/var/tmp/capture_files/';
 
 A L<user-agent switcher|https://chrome.google.com/webstore/detail/user-agent-switcher-for-c/djflhoibgkdhkhhcedjiklpkjnoahfmg?hl=en-US> 
-is very handy in this case.
+is very handy in this case, as it allows you to insert C<"special trigger"> into 
+your User-Agent string, selectively.
 
 =head1 AUTHOR
 

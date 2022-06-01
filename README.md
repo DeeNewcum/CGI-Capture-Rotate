@@ -7,6 +7,8 @@ CGI::Capture files
 
     use CGI::Capture::Rotate '/var/tmp/capture_files/';
 
+or, all the options:
+
     use CGI::Capture::Rotate DIR => '/var/tmp/capture_files/', EXPIRE => '12h',
                              TEMPLATE => 'appnameXXXXXX', SUFFIX => '.storable';
 
@@ -19,9 +21,8 @@ passed directly to [File::Temp](https://metacpan.org/pod/File%3A%3ATemp))
 # DESCRIPTION
 
 Provides two features: This module automatically chooses a unique filename for
-the [CGI::Capture](https://metacpan.org/pod/CGI%3A%3ACapture) file (instead of always recording to the same file), and it
-also removes CGI::Capture files that have expired — by default, ones older than
-three days.
+the [CGI::Capture](https://metacpan.org/pod/CGI%3A%3ACapture) file, and it also removes CGI::Capture files that have
+expired — by default, ones older than three days.
 
 Additionally, a command-line tool (`ls_captures`) is provided which helps to
 locate the specific capture file that you might be interested in applying.
@@ -33,7 +34,8 @@ files, by only triggering a capture in certain specific instances, using [if](ht
                => '/var/tmp/capture_files/';
 
 A [user-agent switcher](https://chrome.google.com/webstore/detail/user-agent-switcher-for-c/djflhoibgkdhkhhcedjiklpkjnoahfmg?hl=en-US) 
-is very handy in this case.
+is very handy in this case, as it allows you to insert `"special trigger"` into 
+your User-Agent string, selectively.
 
 # AUTHOR
 
