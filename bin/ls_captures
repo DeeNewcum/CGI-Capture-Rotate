@@ -79,6 +79,7 @@ if (!-t STDOUT) {
 # TODO: Maybe use Curses.pm to provide a simple menu that allows the user to
 # scroll up/down, while displaying a summary of each capture file in a panel at
 # the bottom?
+my $num_cgicaptures_found = 0;
 foreach my $filename (@file_sorted) {
     my $storable;
     try {
@@ -97,7 +98,11 @@ foreach my $filename (@file_sorted) {
     # if it's a Storable file, but it doesn't contain CGI::Capture contents,
     # then also skip it
     ref($storable) eq 'CGI::Capture'    or next;
+    $num_cgicaptures_found++;
     report_one_capture_file($filename, $storable);
+}
+if (!$num_cgicaptures_found) {
+    print "No CGI::Capture files found.\n";
 }
 
 
