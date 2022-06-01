@@ -40,6 +40,7 @@ use Data::Dumper;               # core Perl since v5.005
 use File::stat          ();     # core Perl since v5.004
 use Path::Tiny          ();
 use Storable            ();     # core Perl since v5.7.3
+use Term::ANSIColor     ();     # core Perl since v5.6.0
 use Try::Tiny;
 
 my $directory;
@@ -60,6 +61,19 @@ while (my $path = $iter->()) {
     $file_ages{$file} = -M $file;       # script start time minus file modification time, in days
 }
 my @file_sorted = sort {$file_ages{$b} <=> $file_ages{$a}} keys %file_ages;
+
+my $colored = \&Term::ANSIColor::colored;
+# don't color if STDOUT isn't connected to a TTY
+if (!-t STDOUT) {
+    $colored = sub {
+        # don't color anything, just return the string unmodified
+        if (ref($_[0]) eq 'ARRAY') {
+            return $_[1];
+        } else{
+            return $_[0];
+        }
+    };
+}
 
 # TODO: Maybe use Curses.pm to provide a simple menu that allows the user to
 # scroll up/down, while displaying a summary of each capture file in a panel at
@@ -144,8 +158,9 @@ sub report_one_capture_file {
         }
     }
 
-    print "$time    $storable->{ENV}{SCRIPT_URI}\n";
-    print "    $params\n"      if ($params);
+    print "$time    ", $colored->($storable->{ENV}{SCRIPT_URI}, 'red'), "\n";
+    print "    ", $colored->($params, 'cyan'), "\n"     if ($params);
     print "    $debug_cmd\n";
-    print "    $storable->{ENV}{REMOTE_ADDR}    $storable->{ENV}{HTTP_USER_AGENT}\n";
+    print "    ", $colored->($storable->{ENV}{REMOTE_ADDR}, 'green'),
+          "    ", $colored->($storable->{ENV}{HTTP_USER_AGENT}, 'blue'), "\n";
 }
