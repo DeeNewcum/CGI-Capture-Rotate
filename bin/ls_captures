@@ -86,10 +86,20 @@ foreach my $filename (@file_sorted) {
 sub report_one_capture_file {
     my ($filename, $storable) = @_;
     my $time = scalar(localtime($storable->{CAPTURE_TIME}));
+    my $debug_cmd = "perl -d -MCGI::Capture=$filename $storable->{PROGRAM_NAME}";
+    if ($storable->{EFFECTIVE_USER_ID} != $>) {
+        my $desired_username = getpwuid($storable->{EFFECTIVE_USER_ID});
+        if ($desired_username) {
+            $debug_cmd = "sudo -u $desired_username $debug_cmd";
+        } else {
+            $debug_cmd = "sudo -u $storable->{EFFECTIVE_USER_ID} $debug_cmd";
+        }
+    }
+
     print "$time    ", url($storable), "\n";
     # this is actually the specific command-line that the dev should use to
     # apply() that CGI::Capture file
-    print "    perl -d -MCGI::Capture=$filename $storable->{PROGRAM_NAME}\n";
+    print "    $debug_cmd\n";
     print "    $storable->{ENV}{HTTP_USER_AGENT}\n";
 }
 
