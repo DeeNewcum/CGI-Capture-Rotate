@@ -71,6 +71,8 @@ use Storable            ();     # Perl core since v5.7.3
 
 sub import {
     my $class = shift;
+    # if we're under the debugger, we don't want to capture anything
+    return if (exists $INC{'perl5db.pl'} && $DB::{single});
     my %options;
     if (@_ == 1) {
         %options = _parse_args(DIR => shift);
