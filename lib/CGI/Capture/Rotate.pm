@@ -15,7 +15,9 @@ CGI::Capture files
 
  use CGI::Capture::Rotate '/var/tmp/capture_files/';
 
-or, all the options:
+A random filename will be chosen in that directory, and a capture file recorded.
+
+Or, with more options:
 
  use CGI::Capture::Rotate DIR => '/var/tmp/capture_files/', EXPIRE => '12h',
                           TEMPLATE => 'appnameXXXXXX', SUFFIX => '.storable';
@@ -24,7 +26,7 @@ C<TEMPLATE> is a filename that ends with several C<X>s, which will be replaced
 by random characters. C<SUFFIX> will be appended to the filename. (both are
 passed directly to L<File::Temp>)
 
-C<EXPIRE> can be '3m', '3h', '3d', '3mo', or '3y'.
+C<EXPIRE> can be '3min', '3h', '3d', '3', or '3y'.
 
 =head1 DESCRIPTION
 
@@ -32,8 +34,8 @@ Provides two features: This module automatically chooses a unique filename for
 the L<CGI::Capture> file, and it also removes CGI::Capture files that have
 expired — by default, ones older than three days.
 
-Additionally, a command-line tool (C<ls_captures>) is provided which helps to
-locate the specific capture file that you might be interested in applying.
+Additionally, a command-line tool (C<ls_captures>) helps to locate the specific
+capture file that you might be interested in applying.
 
 Another way to locate the desired capture file is to simply record fewer capture
 files, by only triggering a capture in certain specific instances, using L<if>:
