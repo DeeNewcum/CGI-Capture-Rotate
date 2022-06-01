@@ -101,14 +101,14 @@ sub report_one_capture_file {
         }
     }
 
-    # if the requester sent method=POST application/x-www-form-urlencoded
-    # parameters, then display them in a user-friendly way
-    my $body_params = '';
-    if (${$storable->{STDIN}}) {
-        my $cgi = CGI::Simple->new(${$storable->{STDIN}});
+    # if the requester sent method=GET query-string parameters, then display
+    # them in a user-friendly way
+    my $params = '';
+    if ($storable->{ENV}{QUERY_STRING}) {
+        my $cgi = CGI::Simple->new($storable->{ENV}{QUERY_STRING});
         foreach my $param ($cgi->param) {
             my $will_add = '';
-            $will_add .= ", "        if ($body_params);
+            $will_add .= ", "        if ($params);
             $will_add .= quotemeta($param);
             $will_add .= "='" . quotemeta($cgi->param($param)) . "'";
             # If a request has quite a few body_params, we should only
@@ -116,27 +116,36 @@ sub report_one_capture_file {
             # hard-code the screen width, but
             # TODO: we should probably fetch the actual current screen width
             # https://stackoverflow.com/a/1782149/1042525
-            if (length($body_params . $will_add) > 120) {
+            if (length($params . $will_add) > 120) {
                 last;   # this latest parameter would push us over the limit
             }
-            $body_params .= $will_add;
+            $params .= $will_add;
         }
     }
 
-    print "$time    ", url($storable), "\n";
-    print "    $body_params\n"      if ($body_params);
+    # if the requester sent method=POST application/x-www-form-urlencoded
+    # parameters, then display them in a user-friendly way
+    if (${$storable->{STDIN}}) {
+        my $cgi = CGI::Simple->new(${$storable->{STDIN}});
+        foreach my $param ($cgi->param) {
+            my $will_add = '';
+            $will_add .= ", "        if ($params);
+            $will_add .= quotemeta($param);
+            $will_add .= "='" . quotemeta($cgi->param($param)) . "'";
+            # If a request has quite a few body_params, we should only
+            # display the first N characters of them. Right now, we
+            # hard-code the screen width, but
+            # TODO: we should probably fetch the actual current screen width
+            # https://stackoverflow.com/a/1782149/1042525
+            if (length($params . $will_add) > 120) {
+                last;   # this latest parameter would push us over the limit
+            }
+            $params .= $will_add;
+        }
+    }
+
+    print "$time    $storable->{ENV}{SCRIPT_URI}\n";
+    print "    $params\n"      if ($params);
     print "    $debug_cmd\n";
     print "    $storable->{ENV}{HTTP_USER_AGENT}\n";
-}
-
-
-# given a CGI::Capture object, return the full URL that initiated that CGI
-# session
-sub url {
-    my ($storable) = @_;
-    my $url = $storable->{ENV}{SCRIPT_URI};
-    if ($storable->{ENV}{QUERY_STRING}) {
-        $url .= "?$storable->{ENV}{QUERY_STRING}";
-    }
-    return $url;
 }
