@@ -36,6 +36,7 @@ use strict;
 use warnings;
 
 use CGI::Simple         ();
+use Cwd                 ();     # core Perl since v5.000
 use Data::Dumper;               # core Perl since v5.005
 use File::stat          ();     # core Perl since v5.004
 use Path::Tiny          ();
@@ -103,9 +104,15 @@ sub report_one_capture_file {
 
     my $time = scalar(localtime($storable->{CAPTURE_TIME}));
 
+    my $uri = $storable->{ENV}{SCRIPT_URI};
+    # we want to display the $PATH_INFO separately
+    $uri =~ s/\Q$storable->{ENV}{PATH_INFO}\E$//
+            if ($storable->{ENV}{PATH_INFO});
+
     # this is the specific command-line that the dev should use to apply()
     # this CGI::Capture file
-    my $debug_cmd = "perl -d -MCGI::Capture=$filename $storable->{PROGRAM_NAME}";
+    my $debug_cmd = "perl -d -MCGI::Capture=" .
+            Cwd::abs_path($filename) . " $storable->{PROGRAM_NAME}";
     if ($storable->{EFFECTIVE_USER_ID} != $>) {
         my $desired_username = getpwuid($storable->{EFFECTIVE_USER_ID});
         if ($desired_username) {
@@ -160,7 +167,8 @@ sub report_one_capture_file {
         }
     }
 
-    print "$time    ", $colored->($storable->{ENV}{SCRIPT_URI}, 'red'), "\n";
+    print "$time    ", $colored->($uri, 'red'),
+          $colored->($storable->{ENV}{PATH_INFO} || '', 'magenta'), "\n";
     print "    ", $colored->($params, 'cyan'), "\n"     if ($params);
     print "    $debug_cmd\n";
     print "    ", $colored->($storable->{ENV}{REMOTE_ADDR}, 'green'),
