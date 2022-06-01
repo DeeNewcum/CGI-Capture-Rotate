@@ -147,5 +147,5 @@ sub report_one_capture_file {
     print "$time    $storable->{ENV}{SCRIPT_URI}\n";
     print "    $params\n"      if ($params);
     print "    $debug_cmd\n";
-    print "    $storable->{ENV}{HTTP_USER_AGENT}\n";
+    print "    $storable->{ENV}{REMOTE_ADDR}    $storable->{ENV}{HTTP_USER_AGENT}\n";
 }
