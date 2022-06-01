@@ -131,6 +131,7 @@ sub report_one_capture_file {
             # TODO: we should probably fetch the actual current screen width
             # https://stackoverflow.com/a/1782149/1042525
             if (length($params . $will_add) > 120) {
+                $params .= ", ..."      unless ($params =~ /, \.\.\.$/);
                 last;   # this latest parameter would push us over the limit
             }
             $params .= $will_add;
@@ -152,6 +153,7 @@ sub report_one_capture_file {
             # TODO: we should probably fetch the actual current screen width
             # https://stackoverflow.com/a/1782149/1042525
             if (length($params . $will_add) > 120) {
+                $params .= ", ..."      unless ($params =~ /, \.\.\.$/);
                 last;   # this latest parameter would push us over the limit
             }
             $params .= $will_add;
