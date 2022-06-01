@@ -84,7 +84,9 @@ foreach my $filename (@file_sorted) {
     try {
         $storable = Storable::retrieve($filename);
     } catch {
-        if (/^Magic number checking on storable file failed/) {
+        if (/^Magic number checking on storable file failed/
+            || /^File is not a perl storable at /)
+        {
             # this wasn't a Storable file, so just skip it
             $storable = undef;
         } else {
