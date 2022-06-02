@@ -16,10 +16,11 @@ CGI::Capture files
 If you want to use the L<single-step debugger|perldebug> on a CGI script,
 L<CGI::Capture> is an extremely useful tool. It records almost all aspects of a
 script's environment, allowing you to replay that environment from the command
-line, so the script thinks it's still running underneath the webserver.
-CGI::Capture::Rotate makes that tool even easier to use.
+line, so the script thinks it's still running underneath the webserver, even
+though it's running at the terminal under an interactive debugger.
 
-Put this at the top of your CGI script:
+CGI::Capture::Rotate makes that tool even easier to use.  Put this at the top of
+your CGI script:
 
  use CGI::Capture::Rotate '/var/tmp/capture_files/';
 
@@ -112,7 +113,8 @@ sub unique_filename {
     $options{DIR} or croak "A directory *must* be specified.\n";
     # UNLINK=>0 because we're not actually using File::Temp because of its
     # temp-file capabilities, but rather its ability to use TEMPLATE and SUFFIX.
-    my ($fh, $filename) = File::Temp::tempfile(UNLINK => 0, %options);
+    my $template = delete $options{TEMPLATE};
+    my ($fh, $filename) = File::Temp::tempfile($template, UNLINK => 0, %options);
     return ($fh, $filename);
 }
 
