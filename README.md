@@ -5,6 +5,12 @@ CGI::Capture files
 
 # SYNOPSIS
 
+If you want to use the [single-step debugger](https://metacpan.org/pod/perldebug) on a CGI script,
+[CGI::Capture](https://metacpan.org/pod/CGI%3A%3ACapture) is an extremely useful tool. It records almost all aspects of a
+script's environment, allowing you to replay that environment from the command
+line, so the script thinks it's still running underneath the webserver.
+CGI::Capture::Rotate makes that tool even easier to use.
+
     use CGI::Capture::Rotate '/var/tmp/capture_files/';
 
 A random filename will be chosen in that directory, and a capture file recorded.
