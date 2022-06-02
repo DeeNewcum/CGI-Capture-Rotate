@@ -11,20 +11,16 @@ script's environment, allowing you to replay that environment from the command
 line, so the script thinks it's still running underneath the webserver.
 CGI::Capture::Rotate makes that tool even easier to use.
 
+Put this at the top of your CGI script:
+
     use CGI::Capture::Rotate '/var/tmp/capture_files/';
 
 A random filename will be chosen in that directory, and a capture file recorded.
 
-Or, with more options:
+Then, at the command line:
 
-    use CGI::Capture::Rotate DIR => '/var/tmp/capture_files/', EXPIRE => '12h',
-                             TEMPLATE => 'appnameXXXXXX', SUFFIX => '.storable';
-
-`TEMPLATE` is a filename that ends with several `X`s, which will be replaced
-by random characters. `SUFFIX` will be appended to the filename. (both are
-passed directly to [File::Temp](https://metacpan.org/pod/File%3A%3ATemp))
-
-`EXPIRE` can be '3min', '3h', '3d', '3', or '3y'.
+    $ cd /var/tmp/capture_files/
+    $ ls_captures
 
 # DESCRIPTION
 
@@ -44,6 +40,17 @@ files, by only triggering a capture in certain specific instances, using [if](ht
 A [user-agent switcher](https://chrome.google.com/webstore/detail/user-agent-switcher-for-c/djflhoibgkdhkhhcedjiklpkjnoahfmg?hl=en-US) 
 is very handy in this case, as it allows you to insert `"special trigger"` into 
 your User-Agent string, selectively.
+
+# PARAMETERS
+
+    use CGI::Capture::Rotate DIR => '/var/tmp/capture_files/', EXPIRE => '12h',
+                             TEMPLATE => 'appnameXXXXXX', SUFFIX => '.storable';
+
+`TEMPLATE` is a filename that ends with several `X`s, which will be replaced
+by random characters. `SUFFIX` will be appended to the filename. (both are
+passed directly to [File::Temp](https://metacpan.org/pod/File%3A%3ATemp))
+
+`EXPIRE` can be '3min', '3h', '3d', '3', or '3y'.
 
 # AUTHOR
 
