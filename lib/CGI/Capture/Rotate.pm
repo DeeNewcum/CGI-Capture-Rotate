@@ -59,7 +59,7 @@ C<TEMPLATE> is a filename that ends with several C<X>s, which will be replaced
 by random characters. C<SUFFIX> will be appended to the filename. (both are
 passed directly to L<File::Temp>)
 
-C<EXPIRE> can be '3min', '3h', '3d', '3', or '3y'.
+C<EXPIRE> can be '3min', '3h', '3d', '3m', or '3y'.
 
 =head1 AUTHOR
 

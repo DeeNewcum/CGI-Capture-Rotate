@@ -8,10 +8,11 @@ CGI::Capture files
 If you want to use the [single-step debugger](https://metacpan.org/pod/perldebug) on a CGI script,
 [CGI::Capture](https://metacpan.org/pod/CGI%3A%3ACapture) is an extremely useful tool. It records almost all aspects of a
 script's environment, allowing you to replay that environment from the command
-line, so the script thinks it's still running underneath the webserver.
-CGI::Capture::Rotate makes that tool even easier to use.
+line, so the script thinks it's still running underneath the webserver, even
+though it's running at the terminal under an interactive debugger.
 
-Put this at the top of your CGI script:
+CGI::Capture::Rotate makes that tool even easier to use.  Put this at the top of
+your CGI script:
 
     use CGI::Capture::Rotate '/var/tmp/capture_files/';
 
@@ -50,7 +51,7 @@ your User-Agent string, selectively.
 by random characters. `SUFFIX` will be appended to the filename. (both are
 passed directly to [File::Temp](https://metacpan.org/pod/File%3A%3ATemp))
 
-`EXPIRE` can be '3min', '3h', '3d', '3', or '3y'.
+`EXPIRE` can be '3min', '3h', '3d', '3m', or '3y'.
 
 # AUTHOR
 
