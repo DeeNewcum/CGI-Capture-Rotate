@@ -15,9 +15,9 @@ CGI::Capture files
 
 If you want to use the L<single-step debugger|perldebug> on a CGI script,
 L<CGI::Capture> is an extremely useful tool. It records almost all aspects of a
-script's environment, allowing you to replay that environment from the command
-line, so the script thinks it's still running underneath the webserver, even
-though it's running at the terminal under an interactive debugger.
+script's environment, allowing you to replay that environment from the debugger
+running at the command line, so the script thinks it's still running underneath
+the webserver.
 
 CGI::Capture::Rotate makes that tool even easier to use.  Put this at the top of
 your CGI script:
@@ -40,16 +40,6 @@ expired — by default, ones older than three days.
 Additionally, a command-line tool (C<ls_captures>) helps to locate the specific
 capture file that you might be interested in applying.
 
-Another way to locate the desired capture file is to simply record fewer capture
-files, by only triggering a capture in certain specific instances, using L<if>:
-
- use if $ENV{HTTP_USER_AGENT} =~ /special trigger/, 'CGI::Capture::Rotate'
-            => '/var/tmp/capture_files/';
-
-A L<user-agent switcher|https://chrome.google.com/webstore/detail/user-agent-switcher-for-c/djflhoibgkdhkhhcedjiklpkjnoahfmg?hl=en-US> 
-is very handy in this case, as it allows you to insert C<"special trigger"> into 
-your User-Agent string, selectively.
-
 =head1 PARAMETERS
 
  use CGI::Capture::Rotate DIR => '/var/tmp/capture_files/', EXPIRE => '12h',
@@ -60,6 +50,19 @@ by random characters. C<SUFFIX> will be appended to the filename. (both are
 passed directly to L<File::Temp>)
 
 C<EXPIRE> can be '3min', '3h', '3d', '3m', or '3y'.
+
+=head1 USER-AGENT SWITCHERS
+
+Another way to locate the desired capture file is to simply record fewer capture
+files, by only triggering a capture in specific situations. In this case,
+L<'if'|if> is useful:
+
+ use if $ENV{HTTP_USER_AGENT} =~ /special trigger/,
+                'CGI::Capture::Rotate' => '/var/tmp/capture_files/';
+
+A L<user-agent switcher|https://chrome.google.com/webstore/detail/user-agent-switcher-for-c/djflhoibgkdhkhhcedjiklpkjnoahfmg?hl=en-US> 
+is very handy in this case, as it allows developers to insert C<"special trigger">
+into their User-Agent strings, selectively.
 
 =head1 AUTHOR
 
