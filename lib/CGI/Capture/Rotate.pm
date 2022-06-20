@@ -85,6 +85,8 @@ use warnings;
 
 use Carp;
 use CGI::Capture        ();
+use File::Spec::Functions;      # Perl core since v5.005_04
+use File::stat          ();     # Perl core since v5.004
 use File::Temp          ();     # Perl core since v5.6.1
 use Storable            ();     # Perl core since v5.7.3
 
@@ -124,8 +126,39 @@ sub unique_filename {
 }
 
 
+# Implements expiry.
+#
+# Pass in the same options that you'd pass in to import().
 sub expire {
-    # TODO: implement this
+    my %options = _parse_args(@_);
+    $options{DIR} or croak "A directory *must* be specified.\n";
+
+    my $cutoff;
+    if ($options{EXPIRE} =~ /^(\d+)min$/) {
+        $cutoff = time() - $1 * 60;
+    } elsif ($options{EXPIRE} =~ /^(\d+)h$/) {
+        $cutoff = time() - $1 * 60 * 60;
+    } elsif ($options{EXPIRE} =~ /^(\d+)d$/) {
+        $cutoff = time() - $1 * 24 * 60 * 60;
+    } elsif ($options{EXPIRE} =~ /^(\d+)m$/) {
+        $cutoff = time() - $1 * 30.4167 * 24 * 60 * 60;
+    } elsif ($options{EXPIRE} =~ /^(\d+)y$/) {
+        $cutoff = time() - $1 * 365.25 * 24 * 60 * 60;
+    } else {
+        die "Invalid expire string: '$options{EXPIRE}'\n";
+    }
+
+    # TODO -- do we only want to expire the files that specifically match
+    #         $options{TEMPLATE} and $options{SUFFIX}?
+    my @files = glob(catfile($options{DIR}, '*'));
+    foreach my $file (@files) {
+        next unless (-f $file);
+        my $stat = File::stat::stat($file);
+        if ($stat->mtime < $cutoff) {
+            unlink($file)
+                or warn "Unable to delete $file: $!\n";
+        }
+    }
 }
 
 
@@ -137,6 +170,7 @@ sub _parse_args {
     # default values
     exists $args{TEMPLATE} or $args{TEMPLATE} = 'XXXXXXXX';
     exists $args{EXPIRE}   or $args{EXPIRE} = '3h';
+    exists $args{SUFFIX}   or $args{SUFFIX} = '';
     # Note that we do NOT provide a default value for DIR. We want to error out
     # if that isn't included.
     return %args;
