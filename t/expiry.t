@@ -64,7 +64,6 @@ sub count_files {
 sub setup_cleanup {
     my ($cutoff_text, $cutoff_seconds, $num_before_cutoff, $num_after_cutoff) = @_;
 
-    # pass all arguments directly to generate_expiry_directory()
     my $tempdir = generate_expiry_directory($cutoff_seconds, $num_before_cutoff,
                         $num_after_cutoff);
     CGI::Capture::Rotate::expire(DIR => $tempdir, EXPIRE => $cutoff_text);
